@@ -1,0 +1,27 @@
+{
+  "name": "tvdb-api",
+  "version": "1.0.0",
+  "description": "A fully-featured API interface for The TVDB",
+  "author": "David Ludwig",
+  "keywords": [
+    "api",
+    "tvdb",
+    "movie",
+    "tv"
+  ],
+  "license": "ISC",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.2.16",
+    "@types/mocha": "^8.2.2",
+    "@types/node": "^14.14.37",
+    "chai": "^4.3.4",
+    "dotenv": "^8.2.0",
+    "mocha": "^8.3.2",
+    "ts-node": "^9.1.1",
+    "typescript": "^4.2.4"
+  }
+}

@@ -1,7 +1,14 @@
+import * as Raw from "./schema_raw";
+
+/**
+ * Modify raw schema definition to contain parsed attributes
+ */
+type Modify<T, R> = Omit<T, keyof R> & R;
+
 /**
  * An alias model
  */
-export interface IAlias {
+ export interface IAlias {
 	language: string,
 	name    : string
 }
@@ -15,32 +22,21 @@ export interface IArtworkBaseRecord {
 	language : string,
 	score    : number,
 	thumbnail: string,
-	type     : bigint
+	type     : number   // int64
 }
 
 /**
  * Extended artwork record
  */
-export interface IArtworkExtendedRecord extends IArtworkBaseRecord {
-	episodeId      : number,
-	height         : bigint,
-	movieId        : number,
-	networkId      : number,
-	peopleId       : number,
-	seasonId       : number,
-	seriesId       : number,
-	seriesPeopleId : number,
-	thumbnailHeight: bigint,
-	thumbnailWidth : bigint,
-	updatedAt      : bigint,
-	width          : bigint
-}
+export type IArtworkExtendedRecord = Modify<Raw.IArtworkExtendedRecord, {
+	updatedAt: Date
+}>;
 
 /**
  * Artwork status record
  */
 export interface IArtworkStatus {
-	id  : bigint,
+	id  : number,   // int64
 	name: string
 }
 
@@ -48,15 +44,15 @@ export interface IArtworkStatus {
  * Artwork type record
  */
 export interface IArtworkType {
-	height     : bigint,
-	id         : bigint,
+	height     : number,   // int64
+	id         : number,   // int64
 	imageFormat: string,
 	name       : string,
 	recordType : string,
 	slug       : string,
-	thumbHeight: bigint,
-	thumbWidth : bigint,
-	width      : bigint
+	thumbHeight: number,   // int64
+	thumbWidth : number,   // int64
+	width      : number    // int64
 }
 
 /**
@@ -75,38 +71,34 @@ export interface IAwardCategoryBaseRecord {
 	award          : IAwardBaseRecord,
 	forMovies      : boolean,
 	forSeries      : boolean,
-	id             : bigint,
+	id             : number,             // int64
 	name           : string
 }
 
 /**
  * Extended award category record
  */
-export interface IAwardCategoryExtendedRecord extends IAwardCategoryBaseRecord {
+export type IAwardCategoryExtendedRecord = Modify<Raw.IAwardCategoryExtendedRecord, {
 	nominees: IAwardNomineeBaseRecord[]
-}
+}>;
 
 /**
  * Extended award record
  */
 export interface IAwardExtendedRecord extends IAwardBaseRecord {
 	categories: IAwardCategoryBaseRecord[],
-	score: bigint
+	score     : number                       // int64
 }
 
 /**
  * Base award nominee record
  */
-export interface IAwardNomineeBaseRecord {
-	character: ICharacter[],
-	details  : string,
-	episode  : IEpisodeBaseRecord,
-	id       : bigint,
-	isWinner : boolean,
-	movie    : IMovieBaseRecord,
-	series   : ISeriesBaseRecord,
-	yeaor    : string
-}
+export type IAwardNomineeBaseRecord = Modify<Raw.IAwardNomineeBaseRecord, {
+	episode: IEpisodeBaseRecord | null,
+	movie  : IMovieBaseRecord   | null,
+	series : ISeriesBaseRecord  | null,
+	year   : number | null
+}>;
 
 /**
  * Biography record
@@ -122,7 +114,7 @@ export interface IBiography {
 export interface ICharacter {
 	aliases             : IAlias[],
 	episodeId           : number,
-	id                  : bigint,
+	id                  : number,     // int64
 	image               : string,
 	isFeatured          : boolean,
 	movieId             : number,
@@ -131,26 +123,18 @@ export interface ICharacter {
 	overviewTranslations: string[],
 	peopleId            : number,
 	seriesId            : number,
-	sort                : bigint,
-	type                : bigint,
+	sort                : number,     // int64
+	type                : number,     // int64
 	url                 : string
 }
 
 /**
  * A company record
  */
-export interface ICompany {
-	activeDate          : string,
-	aliases             : IAlias[],
-	country             : string,
-	id                  : bigint,
-	inactiveDate        : string,
-	name                : string,
-	nameTranslations    : string[],
-	overviewTranslations: string[],
-	primaryCompanyType  : bigint,
-	slug                : string
-}
+export type ICompany = Modify<Raw.ICompany, {
+	activeDate  : Date | null,
+	inactiveDate: Date | null
+}>;
 
 /**
  * A company type record
@@ -164,7 +148,7 @@ export interface ICompanyType {
  * Content rating record
  */
 export interface IContentRating {
-	id         : bigint,
+	id         : number,   // int64
 	name       : string,
 	country    : string,
 	contentType: string,
@@ -186,7 +170,7 @@ export interface ICountry {
  */
 export interface IEntity {
 	movieId : number,
-	order   : bigint,
+	order   : number,   // int64
 	seriesId: number
 }
 
@@ -202,54 +186,27 @@ export interface IEntityType {
 /**
  * Entity update record
  */
-export interface IEntityUpdate {
-	entityType: string,
-	method    : string,
-	recordId  : bigint,
-	timeStamp : bigint
-}
+export type IEntityUpdate = Modify<Raw.IEntityUpdate, {
+	timeStamp: Date
+}>;
 
 /**
  * Base episode record
  */
-export interface IEpisodeBaseRecord {
-	aired               : string,
-	id                  : bigint,
-	image               : string,
-	imageType           : number,
-	isMovie             : bigint,
-	name                : string,
-	nameTranslations    : string[],
-	number              : number,
-	overviewTranslations: string[],
-	runtime             : number,
-	seasonNumber        : number,
-	seasons             : ISeasonBaseRecord[],
-	seriesId            : bigint
-}
+export type IEpisodeBaseRecord = Modify<Raw.IEpisodeBaseRecord, {
+	aired: Date | null
+}>;
 
 /**
  * Extended episode record
  */
-export interface IEpisodeExtendedRecord extends IEpisodeBaseRecord {
-	airsAfterSeason  : number,
-	airsBeforeEpisode: number,
-	airsBeforeSeason : number,
-	awards           : IAwardBaseRecord[],
-	characters       : ICharacter[],
-	contentRatings   : IContentRating[],
-	network          : INetworkBaseRecord,
-	productionCode   : string,
-	remoteIds        : IRemoteID[],
-	tagOptions       : ITagOption[],
-	trailers         : ITrailer[]
-}
+export type IEpisodeExtendedRecord = Modify<Raw.IEpisodeExtendedRecord, IEpisodeBaseRecord>;
 
 /**
  * Gender record
  */
 export interface IGender {
-	id  : bigint, // That's a lotta genders
+	id  : number,   // int64   // That's a lotta genders
 	name: string
 }
 
@@ -257,7 +214,7 @@ export interface IGender {
  * Base genre record
  */
 export interface IGenreBaseRecord {
-	id  : bigint,
+	id  : number,   // int64
 	name: string,
 	slug: string
 }
@@ -277,7 +234,7 @@ export interface ILanguage {
  */
 export interface IListBaseRecord {
 	aliases             : IAlias[],
-	id                  : bigint,
+	id                  : number,     // int64
 	isOfficial          : boolean,
 	name                : string,
 	nameTranslations    : string[],
@@ -291,7 +248,7 @@ export interface IListBaseRecord {
  */
 export interface IListExtendedRecord extends IListBaseRecord {
 	entities: IEntity[],
-	score   : bigint
+	score   : number      // int64
 }
 
 /**
@@ -299,7 +256,7 @@ export interface IListExtendedRecord extends IListBaseRecord {
  */
 export interface IMovieBaseRecord {
 	aliases             : IAlias[],
-	id                  : bigint,
+	id                  : number,     // int64
 	image               : string,
 	name                : string,
 	nameTranslations    : string[],
@@ -312,23 +269,9 @@ export interface IMovieBaseRecord {
 /**
  * Extended movie record
  */
-export interface IMovieExtendedRecord extends IMovieBaseRecord {
-	artworks         : IArtworkBaseRecord[],
-	audioLanguages   : string[],
-	awards           : IAwardBaseRecord[],
-	boxOffice        : string,
-	budget           : string,
-	characters       : ICharacter[],
-	lists            : IListBaseRecord[],
-	genres           : IGenreBaseRecord[],
-	originalCountry  : string,
-	originalLanguage : string,
-	releases         : IRelease[],
-	remoteIds        : IRemoteID[],
-	studios          : IStudioBaseRecord[],
-	subtitleLanguages: string[],
-	trailers         : ITrailer[]
-}
+export type IMovieExtendedRecord = Modify<Raw.IMovieExtendedRecord, {
+	releases: IRelease[]
+}>
 
 /**
  * Base network record
@@ -346,33 +289,25 @@ export interface INetworkBaseRecord {
  */
 export interface IPeopleBaseRecord {
 	aliases: IAlias[],
-	id     : bigint,
+	id     : number,     // int64
 	image  : string,
 	name   : string,
-	score  : bigint
+	score  : number      // int64
 }
 
 /**
  * Extended people record
  */
-export interface IPeopleExtendedRecord extends IPeopleBaseRecord {
-	awards     : IAwardBaseRecord[],
-	biographies: IBiography[],
-	birth      : string,
-	birthPlace : string,
-	characters : ICharacter[],
-	death      : string,
-	gender     : number,
-	races      : IRace[],
-	remoteIds  : IRemoteID[],
-	tagOptions : ITagOption[]
-}
+export type IPeopleExtendedRecord = Modify<Raw.IPeopleExtendedRecord, {
+	birth: Date,
+	death: Date | null
+}>;
 
 /**
  * People type record
  */
 export interface IPeopleType {
-	id  : bigint,
+	id  : number,   // int64
 	name: string
 }
 
@@ -382,48 +317,36 @@ export interface IPeopleType {
 export interface IRace
 {} // Um... ok??
 
-export interface IRelease {
-	country: string,
-	date   : string,
-	detail : string
-}
+/**
+ * Release record
+ */
+export type IRelease = Modify<Raw.IRelease, {
+	date: Date
+}>;
 
 /**
  * Remote ID record
  */
 export interface IRemoteID {
 	id  : string,
-	type: bigint
+	type: number   // int64
 }
 
 /**
  * Search result
  */
-export interface ISearchResult {
-	aliases             : string[],
-	companies           : string[],
-	companyType         : string,
-	country             : string,
-	director            : string,
-	extendedTitle       : string,
-	genres              : string[],
-	id                  : string,
-	imageUrl            : string,
-	name                : string,
-	nameTranslated      : string,
-	network             : string,
-	officialList        : string,
-	overview            : string,
-	overview_translated : string[], // NASTY
-	posters             : string[],
-	primaryLanguage     : string,
-	primaryType         : string,
-	status              : string,
-	translationsWithLang: string,
-	tvdb_id             : string,
-	type                : string,
-	year                : string
-}
+export type ISearchResult = Modify<Raw.ISearchResult, {
+	extended_title  : string | null,
+	country         : string | null,
+	image_url       : string | null,
+	network         : string | null,
+	overview        : string | null,
+	primary_language: string | null,
+	primary_type    : string | null,
+	status          : string | null,
+	tvdb_id         : number,
+	year            : number | null
+}>;
 
 /**
  * A base season record
@@ -436,29 +359,27 @@ export interface ISeasonBaseRecord {
 	imageType           : number,
 	name                : string,
 	nameTranslations    : string[],
-	number              : bigint,
+	number              : number,     // int64
 	overviewTranslations: string[],
-	seriesId            : bigint,
+	seriesId            : number,     // int64
 	slug                : string,
-	type                : bigint
+	type                : number      // int64
 }
 
 /**
  * Extended season record
  */
-export interface ISeasonExtendedRecord extends ISeasonBaseRecord {
-	artwork : IArtworkBaseRecord[],
-	episodes: IEpisodeBaseRecord[],
-	trailers: ITrailer[]
-}
+export type ISeasonExtendedRecord = Modify<Raw.ISeasonExtendedRecord, {
+	episodes: IEpisodeBaseRecord[]
+}>;
 
 /**
  * Season type record
  */
 export interface ISeasonType {
-	id  : bigint,
+	id  : number,   // int64
 	name: string,
-	type: bigint
+	type: number    // int64
 }
 
 /**
@@ -474,63 +395,42 @@ export interface ISeriesAirsDays {
 	wednesday: boolean
 }
 
-/**
- * The base record for a series
- */
- export interface ISeriesBaseRecord {
-	abbreviation        : string,
-	aliases             : IAlias[],
-	country             : string,
-	defaultSeasonType   : bigint,
-	firstAired          : string,
-	id                  : number,
-	image               : string,
-	isOrderRandomized   : boolean,
-	lastAired           : string,
-	name                : string,
-	nameTranslations    : string[],
-	nextAired           : string,
-	originalCountry     : string,
-	originalLanguage    : string,
-	overviewTranslations: string[],
-	score               : number,
-	slug                : string,
-	status              : IStatus,
-}
+export type ISeriesBaseRecord = Modify<Raw.ISeriesBaseRecord, {
+	firstAired: Date | null,
+	lastAired : Date | null,
+	nextAired : Date | null
+}>;
 
 /**
  * The extended record for a series
  */
-export interface ISeriesExtendedRecord extends ISeriesBaseRecord {
-	airsDays  : ISeriesAirsDays,
-	airsTime  : string,
-	artworks  : IArtworkBaseRecord[],
-	characters: ICharacter[],
-	lists     : {},                    // @TODO Check this...
-	genres    : IGenreBaseRecord[],
-	networks  : INetworkBaseRecord[],
-	remoteIds : IRemoteID[],
-	seasons   : ISeasonBaseRecord[],
-	trailers  : ITrailer[]
-}
+export type ISeriesExtendedRecord = Modify<Raw.ISeriesExtendedRecord, ISeriesBaseRecord>;
+
+/**
+ * Series episodes
+ */
+export type ISeriesEpisodes = Modify<Raw.ISeriesEpisodes, {
+	series  : ISeriesBaseRecord,
+	episodes: IEpisodeBaseRecord[]
+}>;
 
 /**
  * Source type record
  */
 export interface ISourceType {
-	id     : bigint,
+	id     : number,   // int64
 	name   : string,
 	postfix: string,
 	prefix : string,
 	slug   : string,
-	sort   : bigint
+	sort   : number    // int64
 }
 
 /**
  * Status record
  */
 export interface IStatus {
-	id         : bigint,
+	id         : number,    // int64
 	keepUpdated: boolean,
 	name       : string,
 	recordType : string
@@ -540,7 +440,7 @@ export interface IStatus {
  * Studio record
  */
 export interface IStudioBaseRecord {
-	id          : bigint,
+	id          : number,   // int64
 	name        : string,
 	parentStudio: number
 }
@@ -551,7 +451,7 @@ export interface IStudioBaseRecord {
 export interface ITag {
 	allowsMultiple: boolean,
 	helpText      : string,
-	id            : bigint,
+	id            : number,       // int64
 	name          : string,
 	options       : ITagOption[]
 }
@@ -561,10 +461,10 @@ export interface ITag {
  */
 export interface ITagOption {
 	helpText: string,
-	id      : bigint,   // (int64) x-go-name: ID
-	name    : string    // x-go-name: Name
-	tag     : bigint    // (int64) x-go-name: Tag
-	tagName : string    // x-go-name: TagName
+	id      : number,   // int64
+	name    : string,
+	tag     : number,   // int64
+	tagName : string
 }
 
 /**
@@ -580,7 +480,7 @@ export interface ITagOption {
  * Trailer record
  */
 export interface ITrailer {
-	id      : bigint,   // (int64) x-go-name: ID
+	id      : number,   // int64
 	language: string,
 	name    : string,
 	url     : string
@@ -593,7 +493,7 @@ export interface ITranslation {
 	aliases  : string[],
 	isAlias  : boolean,
 	isPrimary: boolean,
-	language : string,     // x-go-language: Language
+	language : string,
 	name     : string,
 	overview : string
 }

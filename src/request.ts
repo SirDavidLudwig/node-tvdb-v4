@@ -23,11 +23,20 @@ export class StatusError<T = any> extends Error
 	/**
 	 * Create a new error indicating non-200 status
 	 */
-	public constructor(response: any, statusCode?: number) {
-		super();
+	public constructor(response: T, statusCode?: number, ...args: any[]) {
+		super(...args);
+		Object.setPrototypeOf(this, StatusError.prototype);
 		this.response = response;
 		this.statusCode = statusCode;
 	}
+}
+
+/**
+ * The API response structure
+ */
+export interface IApiResponse<T> {
+	status: string,
+	data  : T
 }
 
 /**
@@ -58,8 +67,10 @@ export default class ApiRequestManager
 	 * @param params    Optional parameters
 	 * @param body      Optional body
 	 */
-	public request(method: string, url: string, authToken?: string, params?: any, body?: string) {
-		return new Promise<any>((resolve, reject) => {
+	protected request<T>(method: string, url: string, authToken?: string, params?: any,
+	                     body?: string)
+	{
+		return new Promise<T>((resolve, reject) => {
 			// Create request options
 			let options = Object.assign({ method, headers: {} }, this.options);
 			if (authToken) {
@@ -74,7 +85,9 @@ export default class ApiRequestManager
 			let requestUrl = new URL(url);
 			if (params) {
 				Object.keys(params).forEach((key) => {
-					requestUrl.searchParams.set(key, params[key]);
+					if (params[key] !== undefined) {
+						requestUrl.searchParams.set(key, params[key]);
+					}
 				});
 			}
 
@@ -85,14 +98,9 @@ export default class ApiRequestManager
 				res.on("data", chunk => {rawData += chunk});
 				res.on("error", reject);
 				res.on("end", () => {
-					let response: any;
-					try {
-						response = JSON.parse(rawData);
-					} catch(e) {
-						response = rawData;
-					}
+					let response: IApiResponse<T> = JSON.parse(rawData);
 					if (res.statusCode == 200) {
-						resolve(response)
+						resolve(response.data)
 					} else {
 						reject(new StatusError(response, res.statusCode));
 					}
@@ -110,17 +118,17 @@ export default class ApiRequestManager
 	/**
 	 * Perform a generic GET request
 	 */
-	public get(path: string, authToken?: string, params?: any) {
-		return this.request("GET", `${API_URL}${path}`, authToken);
+	public async get<T = any>(path: string, authToken?: string, params?: any) {
+		return await this.request<T>("GET", `${API_URL}${path}`, authToken);
 	}
 
 	/**
 	 * Perform a generic POST request
 	 */
-	public post(path: string, authToken?: string, params?: any, body?: any) {
+	public async post<T = any>(path: string, authToken?: string, params?: any, body?: any) {
 		if (body !== undefined) {
 			body = JSON.stringify(body);
 		}
-		return this.request("POST", `${API_URL}${path}`, authToken, params, body);
+		return await this.request<T>("POST", `${API_URL}${path}`, authToken, params, body);
 	}
 }

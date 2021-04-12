@@ -13,7 +13,6 @@ branches:
   - /^release-.*/
 
 install:
-  - yarn remove typescript --no-save
   - yarn install
 
 cache:

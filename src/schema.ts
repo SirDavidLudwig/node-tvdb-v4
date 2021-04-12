@@ -18,7 +18,7 @@ type Modify<T, R> = Omit<T, keyof R> & R;
  */
 export interface IArtworkBaseRecord {
 	id       : number,
-	image    : string,
+	image    : string | null,
 	language : string,
 	score    : number,
 	thumbnail: string,
@@ -64,6 +64,14 @@ export interface IAwardBaseRecord {
 }
 
 /**
+ * Extended award record
+ */
+export interface IAwardExtendedRecord extends IAwardBaseRecord {
+	categories: IAwardCategoryBaseRecord[],
+	score     : number                       // int64
+}
+
+/**
  * Base award category record
  */
 export interface IAwardCategoryBaseRecord {
@@ -83,21 +91,14 @@ export type IAwardCategoryExtendedRecord = Modify<Raw.IAwardCategoryExtendedReco
 }>;
 
 /**
- * Extended award record
- */
-export interface IAwardExtendedRecord extends IAwardBaseRecord {
-	categories: IAwardCategoryBaseRecord[],
-	score     : number                       // int64
-}
-
-/**
  * Base award nominee record
  */
 export type IAwardNomineeBaseRecord = Modify<Raw.IAwardNomineeBaseRecord, {
-	episode: IEpisodeBaseRecord | null,
-	movie  : IMovieBaseRecord   | null,
-	series : ISeriesBaseRecord  | null,
-	year   : number | null
+	character: ICharacter         | null,
+	episode  : IEpisodeBaseRecord | null,
+	movie    : IMovieBaseRecord   | null,
+	series   : ISeriesBaseRecord  | null,
+	year     : number | null
 }>;
 
 /**
@@ -111,22 +112,13 @@ export interface IBiography {
 /**
  * Character record
  */
-export interface ICharacter {
-	aliases             : IAlias[],
-	episodeId           : number,
-	id                  : number,     // int64
-	image               : string,
-	isFeatured          : boolean,
-	movieId             : number,
-	name                : string,
-	nameTranslations    : string[],
-	overviewTranslations: string[],
-	peopleId            : number,
-	seriesId            : number,
-	sort                : number,     // int64
-	type                : number,     // int64
-	url                 : string
-}
+export type ICharacter  = Modify<Raw.ICharacter, {
+	image    : string | null,
+	episodeId: number | null,
+	movieId  : number | null,
+	seriesId : number | null,
+	url      : string | null
+}>;
 
 /**
  * A company record
@@ -152,8 +144,9 @@ export interface IContentRating {
 	name       : string,
 	country    : string,
 	contentType: string,
+	description: string,   // @WARN not listed in spec
 	order      : number,
-	fullName   : string
+	fullname   : string    // @WARN Spec has mislabeled 'fullName'
 }
 
 /**
@@ -200,7 +193,9 @@ export type IEpisodeBaseRecord = Modify<Raw.IEpisodeBaseRecord, {
 /**
  * Extended episode record
  */
-export type IEpisodeExtendedRecord = Modify<Raw.IEpisodeExtendedRecord, IEpisodeBaseRecord>;
+export type IEpisodeExtendedRecord = Modify<Modify<Raw.IEpisodeExtendedRecord, IEpisodeBaseRecord>, {
+	characters: ICharacter[]
+}>;
 
 /**
  * Gender record
@@ -232,16 +227,9 @@ export interface ILanguage {
 /**
  * Base list record
  */
-export interface IListBaseRecord {
-	aliases             : IAlias[],
-	id                  : number,     // int64
-	isOfficial          : boolean,
-	name                : string,
-	nameTranslations    : string[],
-	overview            : string,
-	overviewTranslations: string[],
-	url                 : string
-}
+export type IListBaseRecord = Modify<Raw.IListBaseRecord, {
+	url: string | null
+}>;
 
 /**
  * Extended list record
@@ -254,10 +242,10 @@ export interface IListExtendedRecord extends IListBaseRecord {
 /**
  * Base movie record
  */
-export interface IMovieBaseRecord {
+ export interface IMovieBaseRecord {
 	aliases             : IAlias[],
-	id                  : number,     // int64
-	image               : string,
+	id                  : number,          // int64
+	image               : string | null,
 	name                : string,
 	nameTranslations    : string[],
 	overviewTranslations: string[],
@@ -270,7 +258,8 @@ export interface IMovieBaseRecord {
  * Extended movie record
  */
 export type IMovieExtendedRecord = Modify<Raw.IMovieExtendedRecord, {
-	releases: IRelease[]
+	characters: ICharacter[],
+	releases  : IRelease[]
 }>
 
 /**
@@ -288,19 +277,22 @@ export interface INetworkBaseRecord {
  * Base people record
  */
 export interface IPeopleBaseRecord {
-	aliases: IAlias[],
-	id     : number,     // int64
-	image  : string,
-	name   : string,
-	score  : number      // int64
+	aliases             : IAlias[],
+	id                  : number,          // int64
+	image               : string | null,
+	name                : string,
+	score               : number,          // int64
+	nameTranslations    : string[],
+	overviewTranslations: string[]
 }
 
 /**
  * Extended people record
  */
 export type IPeopleExtendedRecord = Modify<Raw.IPeopleExtendedRecord, {
-	birth: Date,
-	death: Date | null
+	birth     : Date | null,
+	death     : Date | null,
+	characters: ICharacter[]
 }>;
 
 /**
@@ -336,34 +328,35 @@ export interface IRemoteID {
  * Search result
  */
 export type ISearchResult = Modify<Raw.ISearchResult, {
-	extended_title  : string | null,
-	country         : string | null,
-	image_url       : string | null,
-	network         : string | null,
-	overview        : string | null,
-	primary_language: string | null,
-	primary_type    : string | null,
-	status          : string | null,
-	tvdb_id         : number,
-	year            : number | null
+	country          : string | null,
+	image_url        : string | null,
+	name_translated  : string | null,
+	network          : string | null,
+	overview         : string | null,
+	primary_language : string | null,
+	primary_type     : string | null,
+	status           : string | null,
+	tvdb_id          : number,
+	year             : number | null
 }>;
 
 /**
  * A base season record
  */
-export interface ISeasonBaseRecord {
-	abbreviation        : string,
-	country             : string,
+ export interface ISeasonBaseRecord {
+	abbreviation       ?: string,          // @WARN this may be undefined
+	country            ?: string,          // @WARN this may be undefined
 	id                  : number,
-	image               : string,
-	imageType           : number,
+	image               : string | null,
+	imageType           : number | null,   // @WARN This attribute should be looked into...
 	name                : string,
 	nameTranslations    : string[],
-	number              : number,     // int64
+	network             : INetworkBaseRecord,
+	number              : number,          // int64
 	overviewTranslations: string[],
-	seriesId            : number,     // int64
-	slug                : string,
-	type                : number      // int64
+	seriesId            : number,          // int64
+	slug               ?: string,          // @WARN possibly undefined with extended record
+	type                : number           // int64
 }
 
 /**
@@ -398,13 +391,15 @@ export interface ISeriesAirsDays {
 export type ISeriesBaseRecord = Modify<Raw.ISeriesBaseRecord, {
 	firstAired: Date | null,
 	lastAired : Date | null,
-	nextAired : Date | null
+	nextAired : Date | null,
 }>;
 
 /**
  * The extended record for a series
  */
-export type ISeriesExtendedRecord = Modify<Raw.ISeriesExtendedRecord, ISeriesBaseRecord>;
+export type ISeriesExtendedRecord = Modify<Modify<Raw.ISeriesExtendedRecord, ISeriesBaseRecord>, {
+	characters: ICharacter[]
+}>;
 
 /**
  * Series episodes

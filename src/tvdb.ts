@@ -39,6 +39,8 @@ export default class TVDB
 		this.__apiKey = apiKey;
 		this.autoRelogin = autoRelogin;
 		this.requestManager = new ApiRequestManager();
+
+		this.allAwards = this.allAwards.bind(this);
 	}
 
 	/**
@@ -128,7 +130,7 @@ export default class TVDB
 	 * @param page
 	 */
 	public async allAwards() {
-		return await this.requestManager.get<Schema.IAwardBaseRecord[]>(`/awards/`, this.__token);
+		return await this.requestManager.get<Schema.IAwardBaseRecord[]>(`/awards`, this.__token);
 	}
 
 	/**
@@ -157,7 +159,8 @@ export default class TVDB
 	 * @param id
 	 */
 	public async character(id: number) {
-		return await this.requestManager.get<Schema.ICharacter>(`/characters/${id}`, this.__token);
+		let res = await this.requestManager.get<Raw.ICharacter>(`/characters/${id}`, this.__token);
+		return parse.character(res);
 	}
 
 	// Company Information -------------------------------------------------------------------------
@@ -244,7 +247,7 @@ export default class TVDB
 	 */
 	public async episode(id: number) {
 		let res = await this.requestManager.get<Raw.IEpisodeBaseRecord>(`/episodes/${id}`, this.__token);
-		return parse.episodeRecord(res);
+		return parse.episodeBaseRecord(res);
 	}
 
 	/**
@@ -254,7 +257,7 @@ export default class TVDB
 	 */
 	public async episodeExtended(id: number) {
 		let res = await this.requestManager.get<Raw.IEpisodeExtendedRecord>(`/episodes/${id}/extended`, this.__token);
-		return parse.episodeRecord<Schema.IEpisodeExtendedRecord>(res);
+		return parse.episodeExtendedRecord(res);
 	}
 
 	/**
@@ -293,9 +296,10 @@ export default class TVDB
 	 * @param page
 	 */
 	public async allLists(page: number = 0) {
-		return await this.requestManager.get<Schema.IListBaseRecord[]>(`/lists`, this.__token, {
+		let res = await this.requestManager.get<Raw.IListBaseRecord[]>(`/lists`, this.__token, {
 			page
 		});
+		return res.map(parse.listRecord);
 	}
 
 	/**
@@ -304,7 +308,8 @@ export default class TVDB
 	 * @param id
 	 */
 	public async list(id: number) {
-		return await this.requestManager.get<Schema.IListBaseRecord>(`/lists/${id}`, this.__token);
+		let res = await this.requestManager.get<Raw.IListBaseRecord>(`/lists/${id}`, this.__token);
+		return parse.listRecord(res);
 	}
 
 	/**
@@ -410,7 +415,7 @@ export default class TVDB
 	 *
 	 * @param query  The query to search
 	 * @param type   The constrained entity type
-	 * @param year   The year associated with the entity
+	 * @param year   The year associated with a movie|series
 	 * @param offset The result offset
 	 */
 	public async search(query: string, type?: string, year?: number, offset?: number) {
@@ -437,7 +442,7 @@ export default class TVDB
 	 * @param id
 	 */
 	public async seasonExtended(id: number) {
-		let res = await this.requestManager.get<Raw.ISeasonExtendedRecord>(`/seasons/${id}`, this.__token);
+		let res = await this.requestManager.get<Raw.ISeasonExtendedRecord>(`/seasons/${id}/extended`, this.__token);
 		return parse.seasonRecord(res);
 	}
 
@@ -463,9 +468,11 @@ export default class TVDB
 	/**
 	 * Retrieve all available series
 	 */
-	public async allSeries() {
-		let res = await this.requestManager.get<Raw.ISeriesBaseRecord[]>(`/series`, this.__token);
-		return res.map(parse.seriesRecord);
+	public async allSeries(page: number = 0) {
+		let res = await this.requestManager.get<Raw.ISeriesBaseRecord[]>(`/series`, this.__token, {
+			page
+		});
+		return res.map(parse.seriesBaseRecord);
 	}
 
 	/**
@@ -473,7 +480,7 @@ export default class TVDB
 	 */
 	public async series(id: number) {
 		let res = await this.requestManager.get<Raw.ISeriesBaseRecord>(`/series/${id}`, this.__token);
-		return parse.seriesRecord(res);
+		return parse.seriesBaseRecord(res);
 	}
 
 	/**
@@ -481,7 +488,7 @@ export default class TVDB
 	 */
 	public async seriesExtended(id: number) {
 		let res = await this.requestManager.get<Raw.ISeriesExtendedRecord>(`/series/${id}/extended`, this.__token);
-		return parse.seriesRecord<Schema.ISeriesExtendedRecord>(res);
+		return parse.seriesExtendedRecord(res);
 	}
 
 	/**
@@ -493,8 +500,8 @@ export default class TVDB
 			"season-type": seasonType
 		});
 		return <Schema.ISeriesEpisodes> {
-			series: parse.seriesRecord(res.series),
-			episodes: res.episodes.map(parse.episodeRecord)
+			series: parse.seriesBaseRecord(res.series),
+			episodes: res.episodes.map(parse.episodeBaseRecord)
 		}
 	}
 

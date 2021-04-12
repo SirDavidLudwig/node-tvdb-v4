@@ -4,18 +4,23 @@ import * as Schema from "./schema";
  * Extended artwork record
  */
 export interface IArtworkExtendedRecord extends Schema.IArtworkBaseRecord {
-	episodeId      : number,
-	height         : number,   // int64
-	movieId        : number,
-	networkId      : number,
-	peopleId       : number,
-	seasonId       : number,
-	seriesId       : number,
+	episodeId      : number | null,
+	height         : number,             // int64
+	movieId        : number | null,
+	networkId      : number | null,
+	peopleId       : number | null,
+	seasonId       : number | null,
+	seriesId       : number | null,
 	seriesPeopleId : number,
-	thumbnailHeight: number,   // int64
-	thumbnailWidth : number,   // int64
-	updatedAt      : number,   // int64
-	width          : number    // int64
+	thumbnailHeight: number,             // int64
+	thumbnailWidth : number,             // int64
+	updatedAt      : number,             // int64
+	width          : number,             // int64
+	tagOptions     : Schema.ITagOption,  // @WARN not listed in spec
+	status         : {                   // @WARN not listed in the spec
+		id  : number,
+		name: string | null
+	},
 }
 
 /**
@@ -29,7 +34,7 @@ export interface IAwardCategoryExtendedRecord extends Schema.IAwardCategoryBaseR
  * Base award nominee record
  */
 export interface IAwardNomineeBaseRecord {
-	character: Schema.ICharacter,
+	character: ICharacter | null,
 	details  : string,
 	episode  : IEpisodeBaseRecord | null,
 	id       : number,                           // int64
@@ -37,6 +42,28 @@ export interface IAwardNomineeBaseRecord {
 	movie    : Schema.IMovieBaseRecord | null,
 	series   : ISeriesBaseRecord | null,
 	year     : string
+}
+
+/**
+ * Character record
+ */
+ export interface ICharacter {
+	aliases             : Schema.IAlias[],
+	episodeId           : number,
+	id                  : number,     // int64
+	image               : string,
+	isFeatured          : boolean,
+	movieId             : number,
+	name                : string,
+	nameTranslations    : string[],
+	overviewTranslations: string[],
+	peopleId            : number,
+	peopleType          : string,
+	person              : Schema.IPeopleBaseRecord
+	seriesId            : number,
+	sort                : number,     // int64
+	type                : number,     // int64
+	url                 : string
 }
 
 /**
@@ -92,9 +119,9 @@ export interface IEpisodeExtendedRecord extends IEpisodeBaseRecord {
 	airsBeforeEpisode: number,
 	airsBeforeSeason : number,
 	awards           : Schema.IAwardBaseRecord[],
-	characters       : Schema.ICharacter[],
+	characters       : ICharacter[],
 	contentRatings   : Schema.IContentRating[],
-	network          : Schema.INetworkBaseRecord,
+	network         ?: Schema.INetworkBaseRecord,  // @WARN possibly undefined...
 	productionCode   : string,
 	remoteIds        : Schema.IRemoteID[],
 	tagOptions       : Schema.ITagOption[],
@@ -102,24 +129,39 @@ export interface IEpisodeExtendedRecord extends IEpisodeBaseRecord {
 }
 
 /**
+ * Base list record
+ */
+ export interface IListBaseRecord {
+	aliases             : Schema.IAlias[],
+	id                  : number,     // int64
+	isOfficial          : boolean,
+	name                : string,
+	nameTranslations    : string[],
+	overview            : string,
+	overviewTranslations: string[],
+	url                 : string
+}
+
+/**
  * Extended movie record
  */
 export interface IMovieExtendedRecord extends Schema.IMovieBaseRecord {
 	artworks         : Schema.IArtworkBaseRecord[],
-	audioLanguages   : string[],
-	awards           : Schema.IAwardBaseRecord[],
+	audioLanguages   : string[] | null,
+	awards           : Schema.IAwardBaseRecord[] | null,
 	boxOffice        : string,
 	budget           : string,
-	characters       : Schema.ICharacter[],
+	characters       : ICharacter[],
 	lists            : Schema.IListBaseRecord[],
 	genres           : Schema.IGenreBaseRecord[],
 	originalCountry  : string,
-	originalLanguage : string,
+	originalLanguage : string | null,
 	releases         : IRelease[],
 	remoteIds        : Schema.IRemoteID[],
 	studios          : Schema.IStudioBaseRecord[],
-	subtitleLanguages: string[],
-	trailers         : Schema.ITrailer[]
+	subtitleLanguages: string[] | null,
+	tagOptions       : Schema.ITagOption | null
+	trailers         : Schema.ITrailer[] | null
 }
 
 /**
@@ -130,7 +172,7 @@ export interface IPeopleExtendedRecord extends Schema.IPeopleBaseRecord {
 	biographies: Schema.IBiography[],
 	birth      : string,
 	birthPlace : string,
-	characters : Schema.ICharacter[],
+	characters : ICharacter[],
 	death      : string,
 	gender     : number,
 	races      : Schema.IRace[],
@@ -138,6 +180,9 @@ export interface IPeopleExtendedRecord extends Schema.IPeopleBaseRecord {
 	tagOptions : Schema.ITagOption[]
 }
 
+/**
+ * A release record
+ */
 export interface IRelease {
 	country: string,
 	date   : string,
@@ -148,29 +193,29 @@ export interface IRelease {
  * Search result
  */
 export interface ISearchResult {
-	aliases               : string[],
-	companies             : string[],
-	company_type          : string,
-	country               : string,
-	director              : string,
-	extended_title        : string,
-	genres                : string[],
-	id                    : string,
-	image_url             : string,
-	name                  : string,
-	name_translated       : string,
-	network               : string,
-	official_list         : string,
-	overview              : string,
-	overview_translated   : string[],
-	posters               : string[],
-	primary_language      : string,
-	primary_type          : string,
-	status                : string,
-	translations_with_lang: string,
-	tvdb_id               : string,
-	type                  : string,
-	year                  : string
+	aliases               ?: string[],  // @WARN Does not seem to exist
+	companies             ?: string[],  // @WARN Does not seem to exist
+	company_type          ?: string,    // @WARN Does not seem to exist
+	country                : string,
+	director              ?: string,
+	extended_title        ?: string,
+	genres                ?: string[],  // @WARN Does not seem to exist
+	id                     : string,
+	image_url              : string,
+	name                   : string,
+	name_translated        : string,
+	network                : string,
+	official_list         ?: string,
+	overview               : string,
+	overview_translated   ?: string[],
+	posters               ?: string[],  // @WARN Does not seem to exist
+	primary_language       : string,
+	primary_type           : string,
+	status                 : string,
+	translations_with_lang?: string,    // @WARN Does not seem to exist
+	tvdb_id                : string,
+	type                   : string,
+	year                  ?: string
 }
 
 /**
@@ -179,7 +224,7 @@ export interface ISearchResult {
 export interface ISeasonExtendedRecord extends Schema.ISeasonBaseRecord {
 	artwork : Schema.IArtworkBaseRecord[],
 	episodes: IEpisodeBaseRecord[],
-	trailers: Schema.ITrailer[]
+	trailers: Schema.ITrailer[],
 }
 
 /**
@@ -200,7 +245,7 @@ export interface ISeasonExtendedRecord extends Schema.ISeasonBaseRecord {
 	nextAired           : string,
 	originalCountry     : string,
 	originalLanguage    : string,
-	originalNetwork     : Schema.INetworkBaseRecord,          // @WARN Not listed in spec
+	originalNetwork     : Schema.INetworkBaseRecord,  // @WARN Not listed in spec
 	overviewTranslations: string[],
 	score               : number,
 	slug                : string,
@@ -215,7 +260,7 @@ export interface ISeriesExtendedRecord extends ISeriesBaseRecord {
 	airsTime   : string,
 	airsTimeUTC: number | null,                 // @WARN Not listed in spec
 	artworks   : Schema.IArtworkBaseRecord[],
-	characters : Schema.ICharacter[],
+	characters : ICharacter[],
 	lists      : {},                            // @TODO Check this...
 	genres     : Schema.IGenreBaseRecord[],
 	networks   : Schema.INetworkBaseRecord[],

@@ -19,18 +19,44 @@ const parse = {
 	 * Mutate a raw extended award category schema into a parsed schema
 	 */
 	awardCategory(category: Raw.IAwardCategoryExtendedRecord) {
-		return <Schema.IAwardCategoryExtendedRecord>Object.assign(category, {
-			nominees: category.nominees.map(parse.nominee)
+		return <Schema.IAwardCategoryExtendedRecord><unknown>Object.assign(category, {
+			nominees: category.nominees.map(parse.awardNominee)
 		});
 	},
 
 	/**
-	 * Mutate a raw company schema into a parsed schemo
+	 * Mutate a raw award nominee schema into a parsed schema
+	 */
+	 awardNominee(nominee: Raw.IAwardNomineeBaseRecord) {
+		return <Schema.IAwardNomineeBaseRecord>Object.assign(nominee, {
+			character: nominee.character ? parse.character(nominee.character)      : null,
+			episode  : nominee.episode   ? parse.episodeBaseRecord(nominee.episode): null,
+			movie    : nominee.movie     ? nominee.movie                           : null,
+			series   : nominee.series    ? parse.seriesBaseRecord(nominee.series)  : null,
+			year     : nominee.year      ? parseInt(nominee.year)                  : null
+		});
+	},
+
+	/**
+	 * Mutate a raw character schema into a parsed schema
+	 */
+	character(character: Raw.ICharacter) {
+		return <Schema.ICharacter>Object.assign(character, {
+			episodeId: character.episodeId ? character.episodeId: null,
+			movieId  : character.movieId   ? character.movieId  : null,
+			seriesId : character.seriesId  ? character.seriesId : null,
+			image    : character.image || null,
+			url      : character.url   || null
+		});
+	},
+
+	/**
+	 * Mutate a raw company schema into a parsed schema
 	 */
 	company(company: Raw.ICompany) {
 		return <Schema.ICompany>Object.assign(company, {
 			activeDate  : parse.date(company.activeDate),
-			inactiveDate: parse.date(company.inactiveDate)
+			inactiveDate: parse.date(company.inactiveDate),
 		});
 	},
 
@@ -58,9 +84,27 @@ const parse = {
 	/**
 	 * Mutate a raw episode schema into a parsed schema
 	 */
-	episodeRecord<T extends Schema.IEpisodeBaseRecord>(episode: Raw.IEpisodeBaseRecord) {
-		return <T><unknown>Object.assign(episode, {
-			aired: parse.date(episode.aired)
+	episodeBaseRecord(episode: Raw.IEpisodeBaseRecord) {
+		return <Schema.IEpisodeBaseRecord>Object.assign(episode, {
+			aired: parse.date(episode.aired),
+		});
+	},
+
+	/**
+	 * Mutate a raw extended episode schema into a parsed schema
+	 */
+	episodeExtendedRecord(episode: Raw.IEpisodeExtendedRecord) {
+		return <Schema.IEpisodeExtendedRecord>Object.assign(parse.episodeBaseRecord(episode), {
+			characters: episode.characters.map(parse.character)
+		});
+	},
+
+	/**
+	 * Mutate a raw list schema into a parsed schema
+	 */
+	listRecord(list: Raw.IListBaseRecord) {
+		return <Schema.IListBaseRecord>Object.assign(list, {
+			url: list.url || null
 		});
 	},
 
@@ -69,19 +113,8 @@ const parse = {
 	 */
 	movieRecord(movie: Raw.IMovieExtendedRecord) {
 		return <Schema.IMovieExtendedRecord>Object.assign(movie, {
-			releases: movie.releases.map(parse.release)
-		});
-	},
-
-	/**
-	 * Mutate a raw award nominee schema into a parsed schema
-	 */
-	nominee(nominee: Raw.IAwardNomineeBaseRecord) {
-		return <Schema.IAwardNomineeBaseRecord>Object.assign(nominee, {
-			episode: nominee.episode ? parse.episodeRecord(nominee.episode): null,
-			movie  : nominee.movie   ? nominee.movie                       : null,
-			series : nominee.series  ? parse.seriesRecord(nominee.series)  : null,
-			year   : nominee.year    ? parseInt(nominee.year)              : null
+			characters: movie.characters.map(parse.character),
+			releases  : movie.releases.map(parse.release)
 		});
 	},
 
@@ -92,6 +125,7 @@ const parse = {
 		return <Schema.IPeopleExtendedRecord>Object.assign(person, {
 			birth: parse.date(person.birth),
 			death: parse.date(person.death),
+			characters: person.characters.map(parse.character)
 		});
 	},
 
@@ -104,11 +138,14 @@ const parse = {
 		});
 	},
 
+	/**
+	 * Mutate a raw search result schema into a parsed schema
+	 */
 	searchResult(result: Raw.ISearchResult) {
-		return <Schema.ISearchResult> {
+		return <Schema.ISearchResult>Object.assign(result, {
 			country         : result.country || null,
-			extended_title  : result.extended_title || null,
 			image_url       : result.image_url || null,
+			name_translated : result.name_translated || null,
 			network         : result.network || null,
 			overview        : result.overview || null,
 			primary_language: result.primary_language || null,
@@ -116,7 +153,7 @@ const parse = {
 			status          : result.status || null,
 			tvdb_id         : parseInt(result.tvdb_id),
 			year            : result.year ? parseInt(result.year): null
-		}
+		})
 	},
 
 	/**
@@ -124,18 +161,27 @@ const parse = {
 	 */
 	seasonRecord(season: Raw.ISeasonExtendedRecord) {
 		return <Schema.ISeasonExtendedRecord>Object.assign(season, {
-			episodes: season.episodes.map(parse.episodeRecord)
+			episodes: season.episodes.map(parse.episodeBaseRecord)
 		});
 	},
 
 	/**
 	 * Mutate a raw series schema into a parsed schema
 	 */
-	seriesRecord<T extends Schema.ISeriesBaseRecord>(series: Raw.ISeriesBaseRecord) {
-		return <T><unknown>Object.assign(series, {
+	seriesBaseRecord(series: Raw.ISeriesBaseRecord) {
+		return <Schema.ISeriesBaseRecord>Object.assign(series, {
 			firstAired: parse.date(series.firstAired),
 			lastAired : parse.date(series.lastAired),
 			nextAired : parse.date(series.nextAired)
+		});
+	},
+
+	/**
+	 * Mutate a raw extended series schema into a parsed schema
+	 */
+	seriesExtendedRecord(series: Raw.ISeriesExtendedRecord) {
+		return <Schema.ISeriesExtendedRecord>Object.assign(parse.seriesBaseRecord(series), {
+			characters: series.characters.map(parse.character)
 		});
 	}
 }

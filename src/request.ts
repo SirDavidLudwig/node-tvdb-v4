@@ -23,8 +23,8 @@ export class StatusError<T = any> extends Error
 	/**
 	 * Create a new error indicating non-200 status
 	 */
-	public constructor(response: T, statusCode?: number, ...args: any[]) {
-		super(...args);
+	public constructor(response: T, statusCode: number) {
+		super();
 		Object.setPrototypeOf(this, StatusError.prototype);
 		this.response = response;
 		this.statusCode = statusCode;
@@ -102,7 +102,7 @@ export default class ApiRequestManager
 					if (res.statusCode == 200) {
 						resolve(response.data)
 					} else {
-						reject(new StatusError(response, res.statusCode));
+						reject(new StatusError(response, <number>res.statusCode));
 					}
 				});
 			})
@@ -119,7 +119,7 @@ export default class ApiRequestManager
 	 * Perform a generic GET request
 	 */
 	public async get<T = any>(path: string, authToken?: string, params?: any) {
-		return await this.request<T>("GET", `${API_URL}${path}`, authToken);
+		return await this.request<T>("GET", `${API_URL}${path}`, authToken, params);
 	}
 
 	/**

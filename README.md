@@ -1,4 +1,4 @@
-# The TVDB API
+# The TVDB v4 API
 
 [![Build Status](https://www.travis-ci.com/SirDavidLudwig/tvdb-api.svg?branch=master)](https://www.travis-ci.com/SirDavidLudwig/tvdb-api) [![Coverage Status](https://coveralls.io/repos/github/SirDavidLudwig/tvdb-api/badge.svg?branch=master)](https://coveralls.io/github/SirDavidLudwig/tvdb-api?branch=master)
 

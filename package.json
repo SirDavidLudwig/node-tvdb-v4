@@ -1,7 +1,7 @@
 {
   "name": "tvdb-api",
   "version": "1.0.0",
-  "description": "A fully-featured API interface for The TVDB",
+  "description": "A feature-complete interface for The TVDB's v4 API",
   "author": "David Ludwig",
   "keywords": [
     "tvdb",

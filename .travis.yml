@@ -1,0 +1,32 @@
+language: node_js
+
+node_js:
+  - node
+  - lts/*
+
+matrix:
+  fast_finish: true
+
+branches:
+  only:
+  - master
+  - /^release-.*/
+
+install:
+  - yarn remove typescript --no-save
+  - yarn install
+
+cache:
+  directories:
+    - node_modules
+
+git:
+  depth: 1
+
+script: yarn run coverage
+
+after_success:
+  - yarn run coveralls
+
+notifications:
+  webhooks: https://coveralls.io/webhook

@@ -11,11 +11,17 @@
   ],
   "license": "ISC",
   "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc",
+    "build:clean": "yarn run clean && yarn run build",
     "clean": "rimraf -rf ./dist ./coverage ./.nyc_output",
     "coverage": "nyc yarn run test",
     "coveralls": "coveralls < ./coverage/lcov.info",
+    "prepublish": "yarn run build:clean",
     "test": "mocha -r node_modules/ts-node/register ./test/**/*.spec.ts --timeout 5000"
   },
   "devDependencies": {

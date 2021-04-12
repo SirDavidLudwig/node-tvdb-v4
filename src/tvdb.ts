@@ -493,6 +493,9 @@ export default class TVDB
 
 	/**
 	 * Retrieve all episode records within a series
+	 *
+	 * @param id
+	 * @param seasonType The season type
 	 */
 	public async seriesEpisodes(id: number, seasonType: string = "default", page: number = 0) {
 		let res = await this.requestManager.get<Raw.ISeriesEpisodes>(`/series/${id}/episodes/${seasonType}`, this.__token, {
@@ -508,8 +511,8 @@ export default class TVDB
 	/**
 	 * Retrieve translations for a series
 	 *
-	 * @param id
-	 * @param language
+	 * @param id       The ID of the series
+	 * @param language The language to translate to
 	 */
 	public async seriesTranslations(id: number, language: string) {
 		return await this.requestManager.get<Schema.ITranslation>(`/series/${id}/translations/${language}`, this.__token);

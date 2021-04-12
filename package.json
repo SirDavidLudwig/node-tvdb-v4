@@ -1,8 +1,9 @@
 {
-  "name": "tvdb-api",
+  "name": "tvdb-v4",
   "version": "1.0.0",
   "description": "A feature-complete interface for The TVDB's v4 API",
   "author": "David Ludwig",
+  "repository": "SirDavidLudwig/node-tvdb-v4",
   "keywords": [
     "tvdb",
     "api",
